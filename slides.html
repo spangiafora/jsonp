@@ -1,0 +1,260 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+ <head>
+  <title>
+   Slide show
+  </title>
+  <link rel="stylesheet" type="text/css" href="slides.css"/>
+  <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+  <script type="text/javascript" src="slide.js"></script>
+ </head>
+ <body>
+  <div id="magazine" class="magazine">  
+   <button id="prev" class="prev">
+    Previous
+   </button>
+   <button id="next" class="next">
+    Next
+   </button>
+
+   <div id="first" class="slide">
+    <h1>JSONP Slideshow</h1>
+    <p>
+     In addition to writing up this tutorial on how JSONP works I also
+     implemented a slideshow program in JavaScript and CSS.  I am
+     fairly pleased with the results, but it could use some work.
+    </p>
+   </div>
+
+   <div class="slide">
+    <h1>The Problem</h1>
+    <p>
+     We need to be retrieve data from a <b>Web Service</b>
+     running on a server other than the one hosting our application.
+     <br>
+     <br>
+     We could do this with AJAX if the service
+     were on our server.  (There may be a way to specify trusted servers
+     on the server side. I am still looking into that).
+    </p>
+   </div>
+
+   <div class="slide">
+    <h1>Background</h1>
+    In AJAX we:
+    <ul>
+     <li>acquire an XMLHttpRequest object from the browser
+     <li>set HTTP parameters on the object
+     <li>attach a callback to the object to process the returned data
+     <li>invoke the send method on the object 
+    </ul>
+    The browser sends our request back to server the page
+    was loaded from and invokes our handler when the reply
+    arrives.
+   </div>
+
+   <div class="slide">
+    <h1>Alternatives</h1>
+    People looking into ways to get around the "server of origin"
+    restriction looked through the HTML elements for other objects
+    that can access remote servers.  A few that can do that are:
+    <ul>
+     <li>img
+     <li>script
+     <li>frame/iframe
+    </ul>
+    The first two elements have a src attribute that specifies the URL 
+    at which to find the resource.  Frames have other attributes that
+    make them more complicated to use.
+    <br>
+    <br>
+    We use the src attribute of script to load jQuery code from the
+    Google site: <br><br>
+    &lt;script src=<b>"http://ajax.googleapis.com/ajax/...</b>" &gt;
+    &lt;/script&gt;
+    <br><br>
+    Similarly, images can be loaded from remote sites - see next slide.
+   </div>
+
+   <div class="slide">
+    <h1>Remote Images</h1>
+    The image on this page can be found at the following URL:<br><br>
+    http://www.orchidspangiafora.com/collages/corntracks.jpg    
+    <br>
+    <br>
+    <img width="320" src="http://www.orchidspangiafora.com/collages/corntracks.jpg" alt="remote">
+   </div>
+
+   <div class="slide">
+    <h1>Remote Images As Code</h1>
+    If instead of using the url of an image file as the value of the
+    src attribute of an image element we point it at a cgi-script that
+    returns an image, we can have that script take another action
+    before returning the image.  This is frequently used to count
+    visits to a page containing advertising hosted at a site other
+    than that of the server delivering the web page.
+   </div>
+
+   <div class="slide">
+    <h1>JSONP</h1>
+    It turns out that the script element, along with dynamic manipulation
+    of the DOM in a web page, provides a way to retrieve data from
+    other servers <i>provided</i> they configure things to allow it.  
+    <br><br>
+    This technique is know as JSONP, for <span style="color: blue;">JSON</span> 
+    with <span style="color: blue;">P</span>adding.
+   </div>
+
+   <div class="slide">
+    <h1>JSONP on the server side</h1>
+    The first thing we need from the server is the address of a service that
+    will take an argument and return us some data, preferably in JSON format.
+    <br>
+    <br>
+    For our example, www.freegeoip.net
+    accepts requests for RESTful web services in the following form:
+    <br>
+    <br>
+    http://www.freegeoip.net/json/smith.edu
+   </div>
+
+   <div class="slide">
+    <h1>JSONP on the server side (cont.)</h1>
+    In this example, http://www.freegeoip.net/json/ is the location of
+    the web service. 
+    <br>
+    <br>
+    To tell it that the domain for which we would like geographical
+    information is Smith College, we append &ldquo;smith.edu&rdquo;
+    to that.
+   </div>
+
+   <div class="slide">
+    <h1>JSONP on the server side (cont.)</h1>
+    If you visit the resulting url, <br>http://www.freegeoip.net/json/smith.edu<br><br>
+    www.freegeoip.net responds with a JSON object;<br><br>
+    <pre>
+    {"city":         "Northampton", 
+     "region_code":  "MA", 
+     "region_name":  "Massachusetts", 
+     "metrocode":    "543", 
+     "zipcode":      "01063", 
+     "longitude":    "-72.6402", 
+     "country_name": "United States", 
+     "country_code": "US", 
+     "ip":           "131.229.64.19", 
+     "latitude":     "42.3179"}
+    </pre>
+   </div>
+
+   <div class="slide">
+    <h1>JSONP on the server side<span style="font-size: smaller;">(end part 1)</span></h1>
+    So far so good.  But how can we get that data into our JavaScript
+    program in the browser over on the client side?
+   </div>
+
+   <div class="slide">
+    <h1>JSONP on the client</h1>
+    If we dynamically create a script object and attach it to the our
+    web page it will be run as a javascript program as soon as it is
+    complete.<br><br>
+
+    Clicking the button will cause the following script to be loaded
+    into this page.      <br>
+    <br>
+    <pre>
+        &lt;script type="text/javascript"&gt;
+            alert('Thank you')
+        &lt;/script&gt;
+    </pre>
+    <button id="loadscript">Try it</button>
+    <br>
+    This does <b><i>NOT</i></b> add a handler that directly puts up a
+    message when the button is pressed.  The button's action is to
+    modify the page by adding a script.
+   </div>
+
+   <div class="slide">
+    <h1>JSONP on the client (cont.)</h1>
+    So if were to use the same method to attach this script to the page:
+    <pre>
+        &lt;script type="text/javascript src="http://www.freegeoip.net/json/smith.edu"&gt;
+        &lt;/script&gt;
+    </pre>
+    It would cause the browser to attempt to interpret the return value, 
+    <pre>
+    {"city":         "Northampton", 
+     "region_code":  "MA", 
+     (and so forth)...
+     "latitude":     "42.3179"}
+    </pre>
+    as JavaScript.  Unfortunately, that doesn't get us anywhere,
+    because JSON defines an object, but that object is not executable
+    and we have no way to refer to it.  
+    <span style="color: blue;">Here is where JSONP comes in.</span> 
+   </div>
+
+   <div class="slide">
+    <h1>Back to the server</h1>
+    In order to support JSONP requests, server programs allow their
+    web service URLS to be parameterized with a little bit of extra
+    information.  In the case of the Freegeoip API (application
+    programming interface) the parameter that the server looks for is named <b>"callback"</b>.
+   </div>
+
+   <div class="slide">
+    <h1>How a JSONP service handles the extra parameter</h1>
+    If instead of:<br><br>    
+    <b>http://www.freegeoip.net/json/smith.edu</b><br><br>
+    we visit<br><br>    
+    http://www.freegeoip.net/json/smith.edu<b>?callback=getGeoInfo</b>
+    <br><br> 
+    Rather than simply sending us JSON data, the server replies with:
+    <br><br>    
+    <pre>
+     getGeoInfo({"city": "Northampton", "region_code": "MA", 
+                 "region_name": "Massachusetts", "metrocode": "543", 
+                 "zipcode": "01063", "longitude": "-72.6402", 
+                 "country_name": "United States", 
+                 "country_code": "US", 
+                 "ip": "131.229.64.19", 
+                 "latitude": "42.3179"});
+    </pre>
+   </div>
+
+   <div class="slide">
+    <h1>Back to the client</h1>
+    So when the client evaluates the returned data as code:
+    <pre>
+     getGeoInfo({"city": "Northampton", "region_code": "MA", 
+                 "region_name": "Massachusetts", "metrocode": "543", 
+                 "zipcode": "01063", "longitude": "-72.6402", 
+                 "country_name": "United States", 
+                 "country_code": "US", 
+                 "ip": "131.229.64.19", 
+                 "latitude": "42.3179"});
+    </pre>
+    it invokes a function named getGeoInfo.  We defined that function,
+    which is why we passed its name as a parameter to the web service
+    url.  So our method is invoked with the JSON data passed in as the
+    parameter, and we have what we wanted.
+   </div>
+
+   <div class="slide">
+    <h1>What does jQuery do?</h1>
+    jQuery makes things a little simpler for us, and a little cleaner.  When we call 
+    jQuery.getJSON, jQuery:
+    <ol>
+     <li>Invents a unique name for the handler passed to the server
+     <li>Constructs the script to invoke the hander we specified by way of the function it generated
+     <li>Adds the script to the page
+     <li>Invokes our function with the results
+     <li>Removes the script from the page
+    </ol>
+   </div>
+   <div class="slide">
+    <h1>End</h1>
+   </div>
+  </div>
+ </body>
+</html>
